@@ -25,5 +25,5 @@
 
 ## 测试结果展示
 * HTML报告
-![Image](https://github.com/wenpengfan/DemoAPI-test/tree/master/share/screeshots/report.JPG)
+![Image](https://github.com/wenpengfan/DemoAPI-test/tree/master/share/screeshots/report.jpg)
 
