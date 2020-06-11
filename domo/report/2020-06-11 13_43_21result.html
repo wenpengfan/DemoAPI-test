@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>发布会系统接口自动化测试报告</title>
+    <meta name="generator" content="HTMLTestRunner 0.8.2"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    
+<style type="text/css" media="screen">
+body        { font-family: verdana, arial, helvetica, sans-serif; font-size: 80%; }
+table       { font-size: 100%; }
+pre         { }
+
+/* -- heading ---------------------------------------------------------------------- */
+h1 {
+	font-size: 16pt;
+	color: gray;
+}
+.heading {
+    margin-top: 0ex;
+    margin-bottom: 1ex;
+}
+
+.heading .attribute {
+    margin-top: 1ex;
+    margin-bottom: 0;
+}
+
+.heading .description {
+    margin-top: 4ex;
+    margin-bottom: 6ex;
+}
+
+/* -- css div popup ------------------------------------------------------------------------ */
+a.popup_link {
+}
+
+a.popup_link:hover {
+    color: red;
+}
+
+.img{
+	width: 100%;
+	height: 100%;
+	border-collapse: collapse;
+    border: 2px solid #777;
+}
+
+.screenshots {
+    z-index: 100;
+	position:absolute;
+	left: 23%;
+	top: 20%;
+	display: none;
+}
+.close_shots {
+	position:absolute;
+	top:0; left:98%;
+	z-index:99;
+	width:20px;
+}
+.popup_window {
+    display: none;
+    position: relative;
+    left: 0px;
+    top: 0px;
+    /*border: solid #627173 1px; */
+    padding: 10px;
+    background-color: #E6E6D6;
+    font-family: "Lucida Console", "Courier New", Courier, monospace;
+    text-align: left;
+    font-size: 8pt;
+    width: 800px;
+}
+
+}
+/* -- report ------------------------------------------------------------------------ */
+#show_detail_line {
+    margin-top: 3ex;
+    margin-bottom: 1ex;
+}
+#result_table {
+    width: 80%;
+    border-collapse: collapse;
+    border: 1px solid #777;
+}
+#header_row {
+    font-weight: bold;
+    color: white;
+    background-color: #777;
+}
+#result_table td {
+    border: 1px solid #777;
+    padding: 2px;
+}
+#total_row  { font-weight: bold; }
+.passClass  { background-color: #6c6; }
+.failClass  { background-color: #c60; }
+.errorClass { background-color: #c00; }
+.passCase   { color: #6c6; font-weight: bold;}
+.failCase   { color: #c60; font-weight: bold; }
+.errorCase  { color: #c00; font-weight: bold; }
+.hiddenRow  { display: none; }
+.testcase   { margin-left: 2em; }
+
+
+/* -- ending ---------------------------------------------------------------------- */
+#ending {
+}
+.piechart{
+    position:absolute;  ;
+    top:20px;
+    left:350px;
+    width: 200px;
+    float: left;
+    display:  inline;
+}
+
+</style>
+
+</head>
+<body>
+<script language="javascript" type="text/javascript"><!--
+output_list = Array();
+
+/* 增加显示通过分类列表  --YinJia */
+/* level - 0:Summary; 1:Failed; 2:Pass; 3:All */
+function showCase(level) {
+    trs = document.getElementsByTagName("tr");
+    for (var i = 0; i < trs.length; i++) {
+        tr = trs[i];
+        id = tr.id;
+        if (id.substr(0,2) == 'ft') {
+            if (level == 2 || level == 0) {
+                tr.className = 'hiddenRow';
+            }
+            else {
+                tr.className = '';
+            }
+        }
+        if (id.substr(0,2) == 'pt') {
+            if (level < 2) {
+                tr.className = 'hiddenRow';
+            }
+            else {
+                tr.className = '';
+            }
+        }
+    }
+}
+
+
+function showClassDetail(cid, count) {
+    var id_list = Array(count);
+    var toHide = 1;
+    for (var i = 0; i < count; i++) {
+        tid0 = 't' + cid.substr(1) + '.' + (i+1);
+        tid = 'f' + tid0;
+        tr = document.getElementById(tid);
+        if (!tr) {
+            tid = 'p' + tid0;
+            tr = document.getElementById(tid);
+        }
+        id_list[i] = tid;
+        if (tr.className) {
+            toHide = 0;
+        }
+    }
+    for (var i = 0; i < count; i++) {
+        tid = id_list[i];
+        if (toHide) {
+            document.getElementById('div_'+tid).style.display = 'none'
+            document.getElementById(tid).className = 'hiddenRow';
+        }
+        else {
+            document.getElementById(tid).className = '';
+        }
+    }
+}
+
+
+function showTestDetail(div_id){
+    var details_div = document.getElementById(div_id)
+    var displayState = details_div.style.display
+    // alert(displayState)
+    if (displayState != 'block' ) {
+        displayState = 'block'
+        details_div.style.display = 'block'
+    }
+    else {
+        details_div.style.display = 'none'
+    }
+}
+
+
+function html_escape(s) {
+    s = s.replace(/&/g,'&amp;');
+    s = s.replace(/</g,'&lt;');
+    s = s.replace(/>/g,'&gt;');
+    return s;
+}
+/* 增加饼图显示  --YinJia */
+function drawCircle(pass, fail, error){
+    var color = ["#6c6","#c60","#c00"];
+    var data = [pass,fail,error];
+    var text_arr = ["pass", "fail", "error"];
+
+    var canvas = document.getElementById("circle");
+    var ctx = canvas.getContext("2d");
+    var startPoint=0;
+    var width = 20, height = 10;
+    var posX = 112 * 2 + 20, posY = 30;
+    var textX = posX + width + 5, textY = posY + 10;
+    for(var i=0;i<data.length;i++){
+        ctx.fillStyle = color[i];
+        ctx.beginPath();
+        ctx.moveTo(112,84);
+        ctx.arc(112,84,84,startPoint,startPoint+Math.PI*2*(data[i]/(data[0]+data[1]+data[2])),false);
+        ctx.fill();
+        startPoint += Math.PI*2*(data[i]/(data[0]+data[1]+data[2]));
+        ctx.fillStyle = color[i];
+        ctx.fillRect(posX, posY + 20 * i, width, height);
+        ctx.moveTo(posX, posY + 20 * i);
+        ctx.font = 'bold 14px';
+        ctx.fillStyle = color[i];
+        var percent = text_arr[i] + ":"+data[i];
+        ctx.fillText(percent, textX, textY + 20 * i);
+
+    }
+}
+
+function show_shots(obj) {
+	obj.nextElementSibling.style.display="block";
+
+}
+
+function close_shots(obj) {
+	obj.parentElement.style.display="none";
+}
+
+
+
+/* obsoleted by detail in <div>
+function showOutput(id, name) {
+    var w = window.open("", //url
+                    name,
+                    "resizable,scrollbars,status,width=800,height=450");
+    d = w.document;
+    d.write("<pre>");
+    d.write(html_escape(output_list[id]));
+    d.write("\n");
+    d.write("<a href='javascript:window.close()'>close</a>\n");
+    d.write("</pre>\n");
+    d.close();
+}
+*/
+--></script>
+<div class="piechart">
+    <div>
+        <canvas id="circle" width="350" height="168" </canvas>
+    </div>
+</div>
+<div class='heading'>
+<h1>发布会系统接口自动化测试报告</h1>
+<p class='attribute'><strong>测试人员:</strong> Fan</p>
+<p class='attribute'><strong>开始时间:</strong> 2020-06-11 13:43:21</p>
+<p class='attribute'><strong>合计耗时:</strong> 0:00:58.106025</p>
+<p class='attribute'><strong>测试结果:</strong> 总共 5 错误 5 通过率 = 0.00%</p>
+
+<p class='description'>环境：windows 7 浏览器：chrome</p>
+</div>
+
+
+
+<p id='show_detail_line'>显示
+<a href='javascript:showCase(0)'>概要</a>
+<a href='javascript:showCase(1)'>失败[0]</a>
+<a href='javascript:showCase(2)'>通过[0]</a>
+<a href='javascript:showCase(3)'>所有[5]</a>
+</p>
+<table id='result_table'>
+<colgroup>
+<col align='left' />
+<col align='right' />
+<col align='right' />
+<col align='right' />
+<col align='right' />
+<col align='right' />
+<col align='right' />
+</colgroup>
+<tr id='header_row'>
+    <td>用例集/测试用例</td>
+    <td>总计</td>
+    <td>通过</td>
+    <td>失败</td>
+    <td>错误</td>
+    <td>视图</td>
+    <td>错误截图</td>
+</tr>
+
+<tr class='errorClass'>
+    <td>login_sta.loginTest</td>
+    <td>5</td>
+    <td>0</td>
+    <td>0</td>
+    <td>5</td>
+    <td><a href="javascript:showClassDetail('c1',5)">详情</a></td>
+    <td>&nbsp;</td>
+</tr>
+
+    <tr id='ft1.1' class='none'>
+        <td class='errorCase'><div class='testcase'>test_login1: 用户名、密码为空登录</div></td>
+        <td colspan='5' align='center'>
+
+        <!--css div popup start-->
+        <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft1.1')" >
+            错误</a>
+
+        <div id='div_ft1.1' class="popup_window">
+            <div style='text-align: right; color:red;cursor:pointer'>
+            <a onfocus='this.blur();' onclick="document.getElementById('div_ft1.1').style.display = 'none' " >
+               [x]</a>
+            </div>
+            <pre>
+            
+ft1.1: http://topad.sunrisecolors.cn/zabbix/index.php
+&lt;zabbix.test_case.page_obj.login.loginPage.login object at 0x000002E00C4352B0&gt; 页面中未能找到 ('id', 'name') 元素
+Traceback (most recent call last):
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\all_sta\login_sta.py", line 17, in test_login1
+    self.user_login_verify()
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\all_sta\login_sta.py", line 13, in user_login_verify
+    login(self.driver).user_login(username, password)
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\page_obj\login\loginPage.py", line 46, in user_login
+    self.login_username(username)
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\page_obj\login\loginPage.py", line 31, in login_username
+    self.find_element(*self.login_username_loc).send_keys(username)
+AttributeError: 'NoneType' object has no attribute 'send_keys'
+
+
+            </pre>
+        </div>
+        <!--css div popup end-->
+    </td>
+    <td>
+                    <a href="#" onclick="show_shots(this)">显示截图</a>
+                    <div class="screenshots">
+                    <a  class="close_shots" onclick="close_shots(this)">X</a>
+                    <img src="data:image/jpg;base64,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8Ic/jIiIa9euNb22l5dfVSqVGBoaqruULCLi1KlTW5rZ6q233tpxvACQxxkQgEOqVCrF5ORk3ZS225mNaj3f/e53Y2lpKV577bXo7e1dOQtSqVSazpi0UqlUiqIo6p5ra2uLmZmZpsHmjVbvJwAHmzMgAIfU/Px8fPzxxyv3wKiN/diNgYGBuHHjRpRKpZVLtmpnH9555504ffr0rve71Xp7e+PGjRt1z+3FzRcBaJECgANnZmamiIiVn8bHk5OTTc/Vfvr7+4uiKIqenp6V50ZHR+se9/f3F6Ojo03rrV5/cnKy7vXR0dE197Vxudr6qz/HzMzMlpZv1Lhu4/ut9fkjopibm9v5lw/Anmoriobz3QAcCusNui6Xy3H8+HFT0QJwILkEC+CQWj32Y7W7d++KDwAOLIPQAQ6p2jS9jZzYBuAgcwkWAACQxiVYAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACk+f8MZOJ3T1CbQwAAAABJRU5ErkJggg==" class="img"/>
+                    </div></td>
+</tr>
+
+    <tr id='ft1.2' class='none'>
+        <td class='errorCase'><div class='testcase'>test_login2: 用户名正确，密码为空登录验证</div></td>
+        <td colspan='5' align='center'>
+
+        <!--css div popup start-->
+        <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft1.2')" >
+            错误</a>
+
+        <div id='div_ft1.2' class="popup_window">
+            <div style='text-align: right; color:red;cursor:pointer'>
+            <a onfocus='this.blur();' onclick="document.getElementById('div_ft1.2').style.display = 'none' " >
+               [x]</a>
+            </div>
+            <pre>
+            
+ft1.2: http://topad.sunrisecolors.cn/zabbix/index.php
+&lt;zabbix.test_case.page_obj.login.loginPage.login object at 0x000002E00C435400&gt; 页面中未能找到 ('id', 'name') 元素
+Traceback (most recent call last):
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\all_sta\login_sta.py", line 24, in test_login2
+    self.user_login_verify(username="admin", password="")
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\all_sta\login_sta.py", line 13, in user_login_verify
+    login(self.driver).user_login(username, password)
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\page_obj\login\loginPage.py", line 46, in user_login
+    self.login_username(username)
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\page_obj\login\loginPage.py", line 31, in login_username
+    self.find_element(*self.login_username_loc).send_keys(username)
+AttributeError: 'NoneType' object has no attribute 'send_keys'
+
+
+            </pre>
+        </div>
+        <!--css div popup end-->
+    </td>
+    <td>
+                    <a href="#" onclick="show_shots(this)">显示截图</a>
+                    <div class="screenshots">
+                    <a  class="close_shots" onclick="close_shots(this)">X</a>
+                    <img src="data:image/jpg;base64,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8Ic/jIiIa9euNb22l5dfVSqVGBoaqruULCLi1KlTW5rZ6q233tpxvACQxxkQgEOqVCrF5ORk3ZS225mNaj3f/e53Y2lpKV577bXo7e1dOQtSqVSazpi0UqlUiqIo6p5ra2uLmZmZpsHmjVbvJwAHmzMgAIfU/Px8fPzxxyv3wKiN/diNgYGBuHHjRpRKpZVLtmpnH9555504ffr0rve71Xp7e+PGjRt1z+3FzRcBaJECgANnZmamiIiVn8bHk5OTTc/Vfvr7+4uiKIqenp6V50ZHR+se9/f3F6Ojo03rrV5/cnKy7vXR0dE197Vxudr6qz/HzMzMlpZv1Lhu4/ut9fkjopibm9v5lw/Anmoriobz3QAcCusNui6Xy3H8+HFT0QJwILkEC+CQWj32Y7W7d++KDwAOLIPQAQ6p2jS9jZzYBuAgcwkWAACQxiVYAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACk+f8MZOJ3T1CbQwAAAABJRU5ErkJggg==" class="img"/>
+                    </div></td>
+</tr>
+
+    <tr id='ft1.3' class='none'>
+        <td class='errorCase'><div class='testcase'>test_login3: 用户名为空，密码正确</div></td>
+        <td colspan='5' align='center'>
+
+        <!--css div popup start-->
+        <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft1.3')" >
+            错误</a>
+
+        <div id='div_ft1.3' class="popup_window">
+            <div style='text-align: right; color:red;cursor:pointer'>
+            <a onfocus='this.blur();' onclick="document.getElementById('div_ft1.3').style.display = 'none' " >
+               [x]</a>
+            </div>
+            <pre>
+            
+ft1.3: http://topad.sunrisecolors.cn/zabbix/index.php
+&lt;zabbix.test_case.page_obj.login.loginPage.login object at 0x000002E00C435748&gt; 页面中未能找到 ('id', 'name') 元素
+Traceback (most recent call last):
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\all_sta\login_sta.py", line 31, in test_login3
+    self.user_login_verify(password="Fwp4130261994713!")
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\all_sta\login_sta.py", line 13, in user_login_verify
+    login(self.driver).user_login(username, password)
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\page_obj\login\loginPage.py", line 46, in user_login
+    self.login_username(username)
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\page_obj\login\loginPage.py", line 31, in login_username
+    self.find_element(*self.login_username_loc).send_keys(username)
+AttributeError: 'NoneType' object has no attribute 'send_keys'
+
+
+            </pre>
+        </div>
+        <!--css div popup end-->
+    </td>
+    <td>
+                    <a href="#" onclick="show_shots(this)">显示截图</a>
+                    <div class="screenshots">
+                    <a  class="close_shots" onclick="close_shots(this)">X</a>
+                    <img src="data:image/jpg;base64,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8Ic/jIiIa9euNb22l5dfVSqVGBoaqruULCLi1KlTW5rZ6q233tpxvACQxxkQgEOqVCrF5ORk3ZS225mNaj3f/e53Y2lpKV577bXo7e1dOQtSqVSazpi0UqlUiqIo6p5ra2uLmZmZpsHmjVbvJwAHmzMgAIfU/Px8fPzxxyv3wKiN/diNgYGBuHHjRpRKpZVLtmpnH9555504ffr0rve71Xp7e+PGjRt1z+3FzRcBaJECgANnZmamiIiVn8bHk5OTTc/Vfvr7+4uiKIqenp6V50ZHR+se9/f3F6Ojo03rrV5/cnKy7vXR0dE197Vxudr6qz/HzMzMlpZv1Lhu4/ut9fkjopibm9v5lw/Anmoriobz3QAcCusNui6Xy3H8+HFT0QJwILkEC+CQWj32Y7W7d++KDwAOLIPQAQ6p2jS9jZzYBuAgcwkWAACQxiVYAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACk+f8MZOJ3T1CbQwAAAABJRU5ErkJggg==" class="img"/>
+                    </div></td>
+</tr>
+
+    <tr id='ft1.4' class='none'>
+        <td class='errorCase'><div class='testcase'>test_login4: 用户名和密码不匹配</div></td>
+        <td colspan='5' align='center'>
+
+        <!--css div popup start-->
+        <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft1.4')" >
+            错误</a>
+
+        <div id='div_ft1.4' class="popup_window">
+            <div style='text-align: right; color:red;cursor:pointer'>
+            <a onfocus='this.blur();' onclick="document.getElementById('div_ft1.4').style.display = 'none' " >
+               [x]</a>
+            </div>
+            <pre>
+            
+ft1.4: http://topad.sunrisecolors.cn/zabbix/index.php
+&lt;zabbix.test_case.page_obj.login.loginPage.login object at 0x000002E00C4357B8&gt; 页面中未能找到 ('id', 'name') 元素
+Traceback (most recent call last):
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\all_sta\login_sta.py", line 38, in test_login4
+    self.user_login_verify(username="fanwenpeng", password="2sdfd")
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\all_sta\login_sta.py", line 13, in user_login_verify
+    login(self.driver).user_login(username, password)
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\page_obj\login\loginPage.py", line 46, in user_login
+    self.login_username(username)
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\page_obj\login\loginPage.py", line 31, in login_username
+    self.find_element(*self.login_username_loc).send_keys(username)
+AttributeError: 'NoneType' object has no attribute 'send_keys'
+
+
+            </pre>
+        </div>
+        <!--css div popup end-->
+    </td>
+    <td>
+                    <a href="#" onclick="show_shots(this)">显示截图</a>
+                    <div class="screenshots">
+                    <a  class="close_shots" onclick="close_shots(this)">X</a>
+                    <img src="data:image/jpg;base64,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8Ic/jIiIa9euNb22l5dfVSqVGBoaqruULCLi1KlTW5rZ6q233tpxvACQxxkQgEOqVCrF5ORk3ZS225mNaj3f/e53Y2lpKV577bXo7e1dOQtSqVSazpi0UqlUiqIo6p5ra2uLmZmZpsHmjVbvJwAHmzMgAIfU/Px8fPzxxyv3wKiN/diNgYGBuHHjRpRKpZVLtmpnH9555504ffr0rve71Xp7e+PGjRt1z+3FzRcBaJECgANnZmamiIiVn8bHk5OTTc/Vfvr7+4uiKIqenp6V50ZHR+se9/f3F6Ojo03rrV5/cnKy7vXR0dE197Vxudr6qz/HzMzMlpZv1Lhu4/ut9fkjopibm9v5lw/Anmoriobz3QAcCusNui6Xy3H8+HFT0QJwILkEC+CQWj32Y7W7d++KDwAOLIPQAQ6p2jS9jZzYBuAgcwkWAACQxiVYAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACk+f8MZOJ3T1CbQwAAAABJRU5ErkJggg==" class="img"/>
+                    </div></td>
+</tr>
+
+    <tr id='ft1.5' class='none'>
+        <td class='errorCase'><div class='testcase'>test_login5: 用户名、密码正确</div></td>
+        <td colspan='5' align='center'>
+
+        <!--css div popup start-->
+        <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft1.5')" >
+            错误</a>
+
+        <div id='div_ft1.5' class="popup_window">
+            <div style='text-align: right; color:red;cursor:pointer'>
+            <a onfocus='this.blur();' onclick="document.getElementById('div_ft1.5').style.display = 'none' " >
+               [x]</a>
+            </div>
+            <pre>
+            
+ft1.5: http://topad.sunrisecolors.cn/zabbix/index.php
+&lt;zabbix.test_case.page_obj.login.loginPage.login object at 0x000002E00C4356A0&gt; 页面中未能找到 ('id', 'name') 元素
+Traceback (most recent call last):
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\all_sta\login_sta.py", line 45, in test_login5
+    self.user_login_verify(username="fanwenpeng", password="Fwp4130261994713!")
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\all_sta\login_sta.py", line 13, in user_login_verify
+    login(self.driver).user_login(username, password)
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\page_obj\login\loginPage.py", line 46, in user_login
+    self.login_username(username)
+  File "C:\Users\fanwenpeng\PycharmProjects\dobest\自动化测试\test-web-zabbix\zabbix\test_case\page_obj\login\loginPage.py", line 31, in login_username
+    self.find_element(*self.login_username_loc).send_keys(username)
+AttributeError: 'NoneType' object has no attribute 'send_keys'
+
+
+            </pre>
+        </div>
+        <!--css div popup end-->
+    </td>
+    <td>
+                    <a href="#" onclick="show_shots(this)">显示截图</a>
+                    <div class="screenshots">
+                    <a  class="close_shots" onclick="close_shots(this)">X</a>
+                    <img src="data:image/jpg;base64,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8Ic/jIiIa9euNb22l5dfVSqVGBoaqruULCLi1KlTW5rZ6q233tpxvACQxxkQgEOqVCrF5ORk3ZS225mNaj3f/e53Y2lpKV577bXo7e1dOQtSqVSazpi0UqlUiqIo6p5ra2uLmZmZpsHmjVbvJwAHmzMgAIfU/Px8fPzxxyv3wKiN/diNgYGBuHHjRpRKpZVLtmpnH9555504ffr0rve71Xp7e+PGjRt1z+3FzRcBaJECgANnZmamiIiVn8bHk5OTTc/Vfvr7+4uiKIqenp6V50ZHR+se9/f3F6Ojo03rrV5/cnKy7vXR0dE197Vxudr6qz/HzMzMlpZv1Lhu4/ut9fkjopibm9v5lw/Anmoriobz3QAcCusNui6Xy3H8+HFT0QJwILkEC+CQWj32Y7W7d++KDwAOLIPQAQ6p2jS9jZzYBuAgcwkWAACQxiVYAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACkESAAAEAaAQIAAKQRIAAAQBoBAgAApBEgAABAGgECAACk+f8MZOJ3T1CbQwAAAABJRU5ErkJggg==" class="img"/>
+                    </div></td>
+</tr>
+
+<tr id='total_row'>
+    <td>总计</td>
+    <td>5</td>
+    <td>0</td>
+    <td>0</td>
+    <td>5</td>
+	<td>通过率：0.00%</td>
+	<td>&nbsp;</td>
+</tr>
+</table>
+<script>
+    drawCircle(0, 0, 5)
+</script>
+
+<div id='ending'>&nbsp;</div>
+
+</body>
+</html>

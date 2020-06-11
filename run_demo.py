@@ -5,20 +5,20 @@ __author__ = 'YinJia'
 import os, sys
 
 sys.path.append(os.path.dirname(__file__))
-from PathConfig import setting
+from domo.PathConfig import setting
 import unittest, time
 from HTMLTestRunnerCN import HTMLTestRunner
-from lib.sendmail import send_mail
-from lib.newReport import new_report
-from db_fixture import test_data
-from package.HTMLTestRunner import HTMLTestRunner
+from domo.lib.sendmail import send_mail
+from domo.lib.newReport import new_report
+# from db_fixture import test_data
+from domo.package.HTMLTestRunner import HTMLTestRunner
 
 path = os.path.split(os.path.realpath(__file__))[0]
 # caseListFile = os.path.join(path, "config/caselist.txt")  # 配置执行哪些测试文件的配置文件路径
 # 配置执行哪些测试文件的配置文件路径
 caseListFile = setting.TESTCASE_list
 # 真正的测试断言文件路径
-caseFile = os.path.join(path, "testCase")
+caseFile = os.path.join(path, "domo/test_case/all_sta")
 caseList = []
 
 
