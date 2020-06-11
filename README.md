@@ -22,21 +22,21 @@ web测试框架处理过程如下：
 ## 测试框架结构目录介绍
 ```
 目录结构介绍如下：
-* PathConfig/:                 文件路径配置
+* PathConfig/:              文件路径配置
 * image                     截图文件
-* config/:                 测试用例模板文件及数据库和发送邮箱配置文件
-* db_fixture/:             初始化接口测试数据
-* lib/:                    程序核心模块。包含有excel解析读写、发送邮箱、发送请求、生成最新测试报告文件
-* package/:                存放第三方库包。如HTMLTestRunner，用于生成HTML格式测试报告
-* report/:                 生成接口自动化测试报告
+* config/:                  测试用例模板文件及数据库和发送邮箱配置文件
+* db_fixture/:              初始化接口测试数据
+* lib/:                     程序核心模块。包含有excel解析读写、发送邮箱、发送请求、生成最新测试报告文件
+* package/:                 存放第三方库包。如HTMLTestRunner，用于生成HTML格式测试报告
+* report/:                  生成接口自动化测试报告
 * test_case/:               用于编写接口自动化测试用例
-    * all_sta：该目录测试用例文件。根据测试文件匹配规则，以“_sta.py”命名的文件被当作自动化web测试用例执行,以“*API.py”命名的文件被当作自动化web测试用例执行。
-    * models：该目录下存放了一些公共的配置函数及公共类。
-    * page_obj：该目录用于存放测试用例的页面对象（Page Object）。根据自定义规则，以“*Page.py”命名的文件为封装的页面对象文件。
+    * all_sta：				该目录测试用例文件。根据测试文件匹配规则，以“_sta.py”命名的文件被当作自动化web测试用例执行,以“*API.py”命名的文件被当作自动化web测试用例执行。
+    * models：				该目录下存放了一些公共的配置函数及公共类。
+    * page_obj：			该目录用于存放测试用例的页面对象（Page Object）。根据自定义规则，以“*Page.py”命名的文件为封装的页面对象文件。
     
 * run_demo.py：             执行所有接口测试用例的主程序
-* requirements.txt：          依赖包
-* test_api.py：               flask实例
+* requirements.txt：        依赖包
+* test_api.py：             flask实例
 ```
 # ubuntu安装环境
 
